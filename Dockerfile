@@ -1,4 +1,4 @@
-FROM php:8.1-apache
+FROM php:8.2-apache
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -11,14 +11,14 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy only composer files and install dependencies without running scripts
+# Copy only composer files and install dependencies
 COPY composer.json composer.lock ./
 RUN composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader --no-scripts
 
-# Copy all application files
+# Copy the rest of the application files
 COPY . .
 
-# Copy and set up environment
+# Set up environment file
 RUN cp .env.example .env
 
 # Generate application key
@@ -28,7 +28,7 @@ RUN php artisan key:generate
 RUN npm install
 RUN npm run build
 
-# Run artisan optimizations
+# Run Laravel optimizations
 RUN php artisan config:cache
 RUN php artisan route:cache
 RUN php artisan view:cache
@@ -42,5 +42,5 @@ RUN a2enmod rewrite
 # Expose port 80
 EXPOSE 80
 
-# Run Apache in the foreground
+# Start Apache
 CMD ["apache2-foreground"]
