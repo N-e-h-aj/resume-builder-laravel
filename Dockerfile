@@ -1,5 +1,5 @@
 FROM php:8.2-apache
-Run php -v
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     libpng-dev libonig-dev libxml2-dev zip unzip curl git libzip-dev nodejs npm \
@@ -11,30 +11,32 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy only composer files and install dependencies
+# Copy composer files and install dependencies without scripts
 COPY composer.json composer.lock ./
 RUN composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader --no-scripts
 
-# Copy the rest of the application files
+# Copy the application files
 COPY . .
 
-# Set up environment file
+# Copy and setup environment file
 RUN cp .env.example .env
 
-# Generate application key
+# Clear cached config
+RUN php artisan config:clear \
+ && php artisan cache:clear \
+ && php artisan route:clear \
+ && php artisan view:clear
+
+# Generate app key
 RUN php artisan key:generate
 
+# Make storage directories and set permissions
+RUN mkdir -p storage/framework/{sessions,views,cache} \
+ && chmod -R 775 storage bootstrap/cache \
+ && chown -R www-data:www-data storage bootstrap/cache
+
 # Install npm dependencies and build assets
-RUN npm install
-RUN npm run build
-
-# Run Laravel optimizations
-RUN php artisan config:cache
-RUN php artisan route:cache
-RUN php artisan view:cache
-
-# Set proper permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN npm install && npm run build
 
 # Enable Apache rewrite module
 RUN a2enmod rewrite
@@ -42,5 +44,5 @@ RUN a2enmod rewrite
 # Expose port 80
 EXPOSE 80
 
-# Start Apache
+# Run Apache in the foreground
 CMD ["apache2-foreground"]
