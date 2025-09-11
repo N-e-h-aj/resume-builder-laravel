@@ -189,9 +189,9 @@
       </legend>
       <div id="exp-container">
         <div class="group">
-          <input type="text" name="company[0][]" placeholder="Company Name" required>
-          <input type="text" name="company[1][]" placeholder="Position" required>
-          <textarea name="company[2][]" placeholder="Description" required></textarea>
+          <input type="text" name="company[0][]" placeholder="Company Name">
+          <input type="text" name="company[1][]" placeholder="Position" >
+          <textarea name="company[2][]" placeholder="Description"></textarea>
         </div>
       </div>
       <div class="buttons">
@@ -251,8 +251,8 @@
   </template>
   <template id="pro-template">
     <div class="group">
-      <input type="text" name="project[0][]" placeholder="Institute Name" required>
-      <input type="text" name="project[1][]" placeholder="Course Name" required>
+      <input type="text" name="project[0][]" placeholder="Project Title" required>
+      <input type="text" name="project[1][]" placeholder="Description" required>
       <button type="button" class="remove" onclick="removeSection(this)">Remove</button>
     </div>
   </template>
